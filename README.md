@@ -32,8 +32,10 @@
 - [About The Project](#about-the-project)
   - [Supports](#supports)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+  - [Install using Homebrew](#install-using-homebrew)
+  - [Manual Installation](#manual-installation)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
 - [Usage](#usage)
 - [Contact](#contact)
 - [Acknowledgements](#acknowledgments)
@@ -63,7 +65,16 @@ Rewrk, a [wrk](https://github.com/wg/wrk) HTTP Benchmarking Wrapper Script, is d
 
 To set up a local instance of the application, follow the steps below.
 
-### Prerequisites
+### Install using Homebrew
+
+```sh
+brew tap proffapt/brewtap
+brew install rewrk
+```
+
+### Manual Installation
+
+#### Prerequisites
 
 The following dependencies are required to be installed for the project to function properly:
 * `wrk`
@@ -80,7 +91,7 @@ The following dependencies are required to be installed for the project to funct
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-### Installation
+#### Installation
 
 _Now that the environment has been set up and configured to properly compile and run the project, the next step is to install and configure the project locally on your system._
 1. Clone the repository
