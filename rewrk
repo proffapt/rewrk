@@ -1,0 +1,140 @@
+#!/bin/bash
+
+help() {
+    echo "Usage: ${0} COMMAND [OPTIONS]"
+    echo
+    echo "A wrapper script to manage wrk HTTP benchmarking tool"
+    echo
+    echo "Commands:"
+    echo "  status                    Show the status of wrk process"
+    echo "  start ARGS                Start a single wrk instance with specified parameters"
+    echo "    Arguments:"
+    echo "      threads               Number of threads to use"
+    echo "      connections           Number of connections to keep open"
+    echo "      duration              Duration of the test (e.g., 30s, 1m, 1h)"
+    echo "      lb_dns_name           Load balancer DNS name/IP"
+    echo "      intensity             Load intensity value"
+    echo "      [timeout]             Optional: Request timeout (default: 30s)"
+    echo
+    echo "  stop                      Stop the running wrk process"
+    echo
+    echo "  bstart ARGS               Start batch wrk processes using a configuration file"
+    echo "    Arguments:"
+    echo "      load_pattern_file     JSON file containing load patterns"
+    echo "      lb_dns_name           Load balancer DNS name/IP"
+    echo "      [timeout]             Optional: Request timeout (default: 30s)"
+    echo
+    echo "  bstop                     Stop all wrk processes in the batch"
+    echo
+    echo "Example JSON load pattern file format:"
+    echo '{
+  [
+    {
+      "threads": 1,
+      "connections": 2,
+      "duration": "1h",
+      "intensity": 20
+    },
+    {
+      "threads": 1,
+      "connections": 1,
+      "duration": "1h",
+      "intensity": 20
+    }
+  ]
+}'
+    echo
+    echo "Examples:"
+    echo "  ${0} status"
+    echo "  ${0} start 2 100 10m ec2-load-test-stack-1068076846.us-east-2.elb.amazonaws.com 1"
+    echo "  ${0} bstart load.example.json ec2-load-test-stack-1068076846.us-east-2.elb.amazonaws.com"
+    echo "  ${0} stop"
+    echo "  ${0} bstop"
+}
+
+LOG_DIR="${HOME}/wrk.log"
+PID=$(ps aux | grep -w wrk | grep -v grep | awk '{print $2}')
+
+case "${1}" in
+status)
+  if [ -n "$PID" ]; then
+    echo -e "[+] wrk process running ~ $PID"
+    wrk_cmd=$(ps aux | grep -w wrk | grep -v grep | awk '{for(i=11;i<=NF;i++) printf "%s ", $i; print ""}')
+    echo -e "[~] wrk command ~ $wrk_cmd"
+  else
+    echo -e "[-] wrk process not running"
+  fi
+  ;;
+start)
+  if [ -z "$PID" ]; then
+    threads="$2"
+    connections="$3"
+    duration="$4"
+    url="$5"
+    intensity="$6"
+    timeout="${7:-30s}"
+    nohup wrk "-t${threads}" "-c${connections}" "-d${duration}" --timeout "${timeout}" "${url}" >> "$LOG_DIR" 2>&1 &
+
+    PID=$(ps aux | grep -w wrk | grep -v grep | awk '{print $2}')
+    echo "[+] wrk process started in the background ~ $PID"
+  else
+    echo -e "[-] wrk process already running ~ $PID"
+    wrk_cmd=$(ps aux | grep -w wrk | grep -v grep | awk '{for(i=11;i<=NF;i++) printf "%s ", $i; print ""}')
+    echo -e "[~] wrk command ~ $wrk_cmd"
+  fi
+  ;;
+stop)
+  if [ -n "$PID" ]; then
+    kill -9 "$PID"
+    echo -e "[+] wrk process stopped ~ $PID"
+  else
+    echo -e "[-] wrk process not running"
+  fi
+  ;;
+bstart)
+  load_pattern_file="$2"
+  lb_dns_name="$3"
+  timeout="${4:-30s}"
+  if [ ! -f "$load_pattern_file" ]; then
+    echo "[-] ERROR: Load Pattern file not found: $load_pattern_file"
+    exit 1
+  fi
+
+  if [ -z "$PID" ]; then
+    echo "[+] Reading load configurations from $load_pattern_file"
+    (
+      while IFS= read -r line; do
+        threads=$(echo "$line" | jq -r '.threads')
+        connections=$(echo "$line" | jq -r '.connections')
+        duration=$(echo "$line" | jq -r '.duration')
+        intensity=$(echo "$line" | jq -r '.intensity')
+        echo "=== Running wrk with threads=$threads, connections=$connections, duration=$duration, intensity=$intensity ===" >> "$LOG_DIR" 2>&1
+        nohup wrk "-t${threads}" "-c${connections}" "-d${duration}" --timeout "${timeout}" "http://${lb_dns_name}/load/${intensity}" >> "$LOG_DIR" 2>&1 &
+        wait
+      done < <(jq -c '.[]' "$load_pattern_file")
+    ) >> ~/bwrk.log 2>&1 &
+  else
+    echo -e "[-] A wrk process already running ~ $PID"
+    wrk_cmd=$(ps aux | grep -w wrk | grep -v grep | awk '{for(i=11;i<=NF;i++) printf "%s ", $i; print ""}')
+    echo -e "[~] wrk command ~ $wrk_cmd"
+  fi
+  ;;
+bstop)
+  if [ -n "$PID" ]; then
+    GID=$(ps -o pgid= -p "$PID" | tr -d '[:space:]')
+    kill -9 -- "-${GID}"
+    echo -e "[+] wrk parent process terminated ~ $GID"
+  else
+    echo -e "[-] No running wrk process"
+  fi
+  ;;
+help|--help|-h)
+  help
+  exit 0
+  ;;
+*)
+  echo "[-] ERROR: Invalid Command"
+  help
+  exit 1
+  ;;
+esac
