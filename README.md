@@ -13,19 +13,12 @@
 
 </div>
 
-<!-- PROJECT LOGO -->
-<br />
-<!-- UPDATE -->
+<!-- PROJECT HEADER -->
 <div align="center">
-  <a href="https://github.com/proffapt/rewrk">
-    <img width="140" alt="image" src="https://user-images.githubusercontent.com/86282911/206632284-cb260f57-c612-4ab5-b92b-2172c341ab23.png">
-  </a>
-
   <h3 align="center">rewrk</h3>
 
   <p align="center">
-  <!-- UPDATE -->
-    <i>Project one liner slogan goes here</i>
+    <i>Reworked wrk - Managed HTTP benchmarking tool</i>
     <br />
     <a href="https://github.com/proffapt/rewrk/issues">Request Feature | Report Bug</a>
   </p>
@@ -51,25 +44,15 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-<!-- UPDATE -->
-<div align="center">
-  <a href="https://github.com/proffapt/rewrk">
-    <img width="80%" alt="image" src="https://user-images.githubusercontent.com/86282911/206632547-a3b34b47-e7ae-4186-a1e6-ecda7ddb38e6.png">
-  </a>
-</div>
 
-_Detailed explaination of the project goes here_
+Rewrk, a [wrk](https://github.com/wg/wrk) HTTP Benchmarking Wrapper Script, is designed to abstract the complexity of managing wrk processes. It provides functionality for both single benchmarking test and _sequential_ benchmarking as batch operations, provided via configuration file (.json), making load testing and benchmarking of HTTP servers straightforward.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <div id="supports"></div>
 
 ### Supports:
-1. Shells
-    * `bash`
-    * `fish`
-    * `zsh`
-2. OS(s)
+1. OS(s)
     * `MacOS`[`BSD` based]
     * any `*nix`[`GNU+Linux` and `Unix`]
 
@@ -81,11 +64,18 @@ _Detailed explaination of the project goes here_
 To set up a local instance of the application, follow the steps below.
 
 ### Prerequisites
-<!-- UPDATE -->
+
 The following dependencies are required to be installed for the project to function properly:
-* npm
-  ```sh
-  npm install npm@latest -g
+* `wrk`
+
+  Follow the installation instructions for your platform for [wrk](https://github.com/wg/wrk).
+
+* `jq`
+
+  ```bash
+  sudo apt install jq   # Ubuntu/Debian
+  sudo yum install jq   # CentOS/Fedora
+  brew install jq       # macOS (HomeBrew)
   ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -93,7 +83,6 @@ The following dependencies are required to be installed for the project to funct
 ### Installation
 
 _Now that the environment has been set up and configured to properly compile and run the project, the next step is to install and configure the project locally on your system._
-<!-- UPDATE -->
 1. Clone the repository
    ```sh
    git clone https://github.com/proffapt/rewrk.git
@@ -113,14 +102,55 @@ _Now that the environment has been set up and configured to properly compile and
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-<!-- UPDATE -->
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space.
 
-<div align="center">
-  <a href="https://github.com/proffapt/rewrk">
-    <img width="80%" alt="image" src="https://user-images.githubusercontent.com/86282911/206632640-40dc440e-5ef3-4893-be48-618f2bd85f37.png">
-  </a>
-</div>
+```graphql
+Usage: ./rewrk COMMAND [OPTIONS]
+
+A wrapper script to manage wrk HTTP benchmarking tool
+
+Commands:
+  status                    Show the status of wrk process
+  start ARGS                Start a single wrk instance with specified parameters
+    Arguments:
+      threads               Number of threads to use
+      connections           Number of connections to keep open
+      duration              Duration of the test (e.g., 30s, 1m, 1h)
+      url                   Target URL
+      [timeout]             Optional: Request timeout (default: 30s)
+
+  stop                      Stop the running wrk process
+
+  bstart ARGS               Start batch wrk processes using a configuration file
+    Arguments:
+      load_pattern_file     JSON file containing load patterns
+      url                   Target URL
+      [timeout]             Optional: Request timeout (default: 30s)
+
+  bstop                     Stop all wrk processes in the batch
+
+Example JSON load pattern file format:
+{
+  [
+    {
+      "threads": 1,
+      "connections": 2,
+      "duration": "1h"
+    },
+    {
+      "threads": 1,
+      "connections": 1,
+      "duration": "1h"
+    }
+  ]
+}
+
+Examples:
+  ./rewrk status
+  ./rewrk start 1 2 10m http://example.com/load/1
+  ./rewrk bstart load.example.json http://example.com/load/1
+  ./rewrk stop
+  ./rewrk bstop
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -154,7 +184,6 @@ Use this space to show useful examples of how a project can be used. Additional 
 
 * [Choose an Open Source License](https://choosealicense.com)
 * [Img Shields](https://shields.io)
-<!-- UPDATE -->
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

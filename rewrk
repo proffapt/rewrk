@@ -43,8 +43,8 @@ help() {
     echo
     echo "Examples:"
     echo "  ${0} status"
-    echo "  ${0} start 1 2 10m http://ec2-load-test-stack-1068076846.us-east-2.elb.amazonaws.com 1/load/1"
-    echo "  ${0} bstart load.example.json http://ec2-load-test-stack-1068076846.us-east-2.elb.amazonaws.com/load/1"
+    echo "  ${0} start 1 2 10m http://example.com/load/1"
+    echo "  ${0} bstart load.example.json http://example.com/load/1"
     echo "  ${0} stop"
     echo "  ${0} bstop"
 }
